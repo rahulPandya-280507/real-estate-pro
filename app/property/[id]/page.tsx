@@ -1,22 +1,39 @@
 import Navbar from "@/components/Navbar";
 
 async function getProperty(id: string) {
-  const res = await fetch(`http://localhost:3000/api/properties`, {
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/properties`,
+      {
+        cache: "no-store",
+      }
+    );
 
-  const properties = await res.json();
-  console.log("All properties:", properties);
-  console.log("URL ID:", id);
-  return properties.find((p: any) => p._id.toString() === id);
+    if (!res.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+
+    const properties = await res.json();
+
+    return properties.find((p: any) => String(p._id) === id);
+  } catch (error) {
+    console.error("ERROR FETCHING PROPERTY:", error);
+    return null;
+  }
 }
 
 export default async function PropertyPage({ params }: any) {
-  const { id } = await params;
+  const { id } = await params; // ✅ required for Next.js
 
   const property = await getProperty(id);
 
-  if (!property) return <div>Property not found</div>;
+  if (!property) {
+    return (
+      <div className="p-10 text-center text-gray-900">
+        Property not found
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -24,9 +41,14 @@ export default async function PropertyPage({ params }: any) {
 
       <div className="px-4 md:px-10 py-10 bg-gray-50 min-h-screen">
         <div className="grid md:grid-cols-2 gap-10 items-start">
+
           {/* Image */}
           <img
-            src={property.image}
+            src={
+              property.image?.startsWith("http")
+                ? property.image
+                : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+            }
             className="w-full h-[40vh] md:h-[60vh] object-cover rounded-2xl shadow-md"
           />
 
@@ -36,7 +58,9 @@ export default async function PropertyPage({ params }: any) {
               {property.title}
             </h1>
 
-            <p className="text-gray-600 mt-2 text-lg">{property.location}</p>
+            <p className="text-gray-600 mt-2 text-lg">
+              {property.location}
+            </p>
 
             <p className="text-2xl md:text-3xl font-bold mt-4 text-black">
               {property.price}
@@ -46,14 +70,11 @@ export default async function PropertyPage({ params }: any) {
               {property.description}
             </p>
 
-            <button
-              className="bg-black text-white px-6 py-3 rounded-lg 
-hover:bg-gray-800 active:scale-95 transition 
-duration-150 ease-in-out font-medium"
-            >
+            <button className="mt-8 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 active:scale-95 transition duration-150 ease-in-out font-medium">
               Contact Broker
             </button>
           </div>
+
         </div>
       </div>
     </div>
