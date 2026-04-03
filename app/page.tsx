@@ -2,7 +2,7 @@ import Navbar from "../components/Navbar";
 import PropertyCard from "../components/PropertyCard";
 import { Suspense } from "react";
 async function getProperties() {
-  const res = await fetch("http://localhost:3000/api/properties", {
+  const res = await fetch("/api/properties", {
     cache: "no-store",
   });
 
