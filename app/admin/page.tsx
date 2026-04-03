@@ -19,30 +19,32 @@ export default function AdminPage() {
 
   // 🔥 MULTIPLE IMAGE UPLOAD
   const handleImages = async (e: any) => {
-    const files = e.target.files;
+    const files = Array.from(e.target.files) as File[];
 
     setLoading(true);
 
-    let uploadedImages: string[] = [];
+    const uploadedImages: string[] = [];
 
-    for (let file of files) {
+    for (const file of files) {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
 
-      await new Promise((resolve) => {
-        reader.onloadend = async () => {
-          if (typeof reader.result === "string") {
-            const res = await fetch("/api/upload", {
-              method: "POST",
-              body: JSON.stringify({ image: reader.result }),
-            });
-
-            const data = await res.json();
-            uploadedImages.push(data.url);
-            resolve(null);
-          }
-        };
+      const base64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
       });
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: JSON.stringify({ image: base64 }),
+      });
+
+      const data = await res.json();
+      console.log("UPLOAD RESPONSE:", data);
+      if (data.url) {
+        uploadedImages.push(data.url);
+      } else {
+        console.error("Upload failed:", data);
+      }
     }
 
     setImages(uploadedImages);
@@ -69,13 +71,9 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-xl">
-
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">
-          Admin Panel
-        </h1>
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">Admin Panel</h1>
 
         <div className="space-y-4">
-
           <input
             name="title"
             placeholder="Title"
@@ -99,9 +97,7 @@ export default function AdminPage() {
 
           {/* 🔥 MULTIPLE IMAGE INPUT */}
           <label className="block">
-            <span className="text-gray-700 font-medium">
-              Upload Images
-            </span>
+            <span className="text-gray-700 font-medium">Upload Images</span>
 
             <input
               type="file"
@@ -113,9 +109,7 @@ export default function AdminPage() {
 
           {/* 🔥 LOADING STATE */}
           {loading && (
-            <p className="text-sm text-gray-600">
-              Uploading images...
-            </p>
+            <p className="text-sm text-gray-600">Uploading images...</p>
           )}
 
           {/* 🔥 PREVIEW IMAGES */}
@@ -135,7 +129,6 @@ export default function AdminPage() {
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-black"
           />
-
         </div>
 
         <button
@@ -144,7 +137,6 @@ export default function AdminPage() {
         >
           Add Property
         </button>
-
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
 import Navbar from "@/components/Navbar";
-import ImageGallery from "@/components/ImageGallery";
+import ImageGallery from "../../../components/ImageGallery";
 
 async function getProperty(id: string) {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/properties`,
-      {
-        cache: "no-store",
-      }
-    );
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/properties`, {
+      cache: "no-store",
+    });
 
     const properties = await res.json();
 
@@ -40,7 +40,7 @@ export default async function PropertyPage({ params }: any) {
         <div className="grid md:grid-cols-2 gap-10 items-start">
 
           {/* 🔥 IMAGE GALLERY */}
-          <ImageGallery images={property.images} />
+          <ImageGallery images={property.images || [property.image]} />
 
           {/* DETAILS */}
           <div>

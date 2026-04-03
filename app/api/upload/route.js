@@ -1,11 +1,24 @@
 import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const upload = await cloudinary.uploader.upload(body.image, {
-    folder: "real-estate",
-  });
+    if (!body.image) {
+      return Response.json({ error: "No image provided" }, { status: 400 });
+    }
 
-  return Response.json({ url: upload.secure_url });
+    const upload = await cloudinary.uploader.upload(body.image, {
+      folder: "real-estate",
+    });
+
+    if (!upload.secure_url) {
+      return Response.json({ error: "Upload failed" }, { status: 500 });
+    }
+
+    return Response.json({ url: upload.secure_url });
+  } catch (error) {
+    console.error("UPLOAD ERROR:", error);
+    return Response.json({ error: "Upload crashed" }, { status: 500 });
+  }
 }

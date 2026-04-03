@@ -3,12 +3,9 @@ import PropertyCard from "../components/PropertyCard";
 
 async function getProperties() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/properties`,
-      {
-        cache: "no-store",
-      }
-    );
+    const res = await fetch("http://localhost:3000/api/properties", {
+      cache: "no-store",
+    });
 
     if (!res.ok) {
       throw new Error("Failed to fetch properties");
@@ -66,9 +63,7 @@ export default async function Home() {
         </h2>
 
         {properties.length === 0 ? (
-          <p className="text-center text-gray-600">
-            No properties found
-          </p>
+          <p className="text-center text-gray-600">No properties found</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {properties.map((p: any) => (
