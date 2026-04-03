@@ -3,8 +3,7 @@ import ImageGallery from "../../../components/ImageGallery";
 
 async function getProperty(id: string) {
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     const res = await fetch(`${baseUrl}/api/properties`, {
       cache: "no-store",
@@ -26,9 +25,7 @@ export default async function PropertyPage({ params }: any) {
 
   if (!property) {
     return (
-      <div className="p-10 text-center text-gray-900">
-        Property not found
-      </div>
+      <div className="p-10 text-center text-gray-900">Property not found</div>
     );
   }
 
@@ -38,7 +35,6 @@ export default async function PropertyPage({ params }: any) {
 
       <div className="px-4 md:px-10 py-10 bg-gray-50 min-h-screen">
         <div className="grid md:grid-cols-2 gap-10 items-start">
-
           {/* 🔥 IMAGE GALLERY */}
           <ImageGallery images={property.images || [property.image]} />
 
@@ -48,9 +44,7 @@ export default async function PropertyPage({ params }: any) {
               {property.title}
             </h1>
 
-            <p className="text-gray-600 mt-2 text-lg">
-              {property.location}
-            </p>
+            <p className="text-gray-600 mt-2 text-lg">{property.location}</p>
 
             <p className="text-2xl md:text-3xl font-bold mt-4 text-black">
               {property.price}
@@ -64,7 +58,6 @@ export default async function PropertyPage({ params }: any) {
               Contact Broker
             </button>
           </div>
-
         </div>
       </div>
     </div>
