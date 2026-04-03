@@ -7,43 +7,60 @@ export default function AdminPage() {
     title: "",
     price: "",
     location: "",
-    image: "",
     description: "",
   });
+
+  const [images, setImages] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImage = (e: any) => {
-    const file = e.target.files[0];
+  // 🔥 MULTIPLE IMAGE UPLOAD
+  const handleImages = async (e: any) => {
+    const files = e.target.files;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
+    setLoading(true);
 
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setForm({ ...form, image: reader.result });
-      }
-    };
+    let uploadedImages: string[] = [];
+
+    for (let file of files) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      await new Promise((resolve) => {
+        reader.onloadend = async () => {
+          if (typeof reader.result === "string") {
+            const res = await fetch("/api/upload", {
+              method: "POST",
+              body: JSON.stringify({ image: reader.result }),
+            });
+
+            const data = await res.json();
+            uploadedImages.push(data.url);
+            resolve(null);
+          }
+        };
+      });
+    }
+
+    setImages(uploadedImages);
+    setLoading(false);
   };
 
   const handleSubmit = async () => {
-    let imageUrl = form.image;
-
-    if (form.image.startsWith("data:")) {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: JSON.stringify({ image: form.image }),
-      });
-
-      const data = await res.json();
-      imageUrl = data.url;
+    if (images.length === 0) {
+      alert("Please upload at least one image");
+      return;
     }
 
     await fetch("/api/properties", {
       method: "POST",
-      body: JSON.stringify({ ...form, image: imageUrl }),
+      body: JSON.stringify({
+        ...form,
+        images, // ✅ send array
+      }),
     });
 
     alert("Property Added!");
@@ -52,64 +69,82 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-xl">
-        <div className="p-10 max-w-xl mx-auto">
-          <h1 className="text-2xl font-bold mb-5 text-gray-900">Admin Panel</h1>
-          <div className="space-y-4">
-            <input
-              name="title"
-              placeholder="Title"
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg 
-text-gray-900 placeholder-gray-500 
-focus:outline-none focus:ring-2 focus:ring-black 
-focus:scale-[1.01] transition"
-            />
-            <input
-              name="price"
-              placeholder="Price"
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg 
-text-gray-900 placeholder-gray-500 
-focus:outline-none focus:ring-2 focus:ring-black 
-focus:scale-[1.01] transition"
-            />
-            <input
-              name="location"
-              placeholder="Location"
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg 
-text-gray-900 placeholder-gray-500 
-focus:outline-none focus:ring-2 focus:ring-black 
-focus:scale-[1.01] transition"
-            />
 
-            <label className="block mb-4">
-              <span className="text-gray-700 font-medium">Upload Image</span>
-              <input
-                type="file"
-                onChange={handleImage}
-                className="mt-2 w-full text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-black file:text-white hover:file:bg-gray-800"
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">
+          Admin Panel
+        </h1>
+
+        <div className="space-y-4">
+
+          <input
+            name="title"
+            placeholder="Title"
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-black"
+          />
+
+          <input
+            name="price"
+            placeholder="Price"
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-black"
+          />
+
+          <input
+            name="location"
+            placeholder="Location"
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-black"
+          />
+
+          {/* 🔥 MULTIPLE IMAGE INPUT */}
+          <label className="block">
+            <span className="text-gray-700 font-medium">
+              Upload Images
+            </span>
+
+            <input
+              type="file"
+              multiple
+              onChange={handleImages}
+              className="mt-2 w-full text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-black file:text-white hover:file:bg-gray-800"
+            />
+          </label>
+
+          {/* 🔥 LOADING STATE */}
+          {loading && (
+            <p className="text-sm text-gray-600">
+              Uploading images...
+            </p>
+          )}
+
+          {/* 🔥 PREVIEW IMAGES */}
+          <div className="flex gap-2 flex-wrap">
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                className="h-16 w-20 object-cover rounded"
               />
-            </label>
-
-            <textarea
-              name="description"
-              placeholder="Description"
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg 
-text-gray-900 placeholder-gray-500 
-focus:outline-none focus:ring-2 focus:ring-black 
-focus:scale-[1.01] transition"
-            />
+            ))}
           </div>
 
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
-          >
-            Add Property
-          </button>
+          <textarea
+            name="description"
+            placeholder="Description"
+            onChange={handleChange}
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-black"
+          />
+
         </div>
+
+        <button
+          onClick={handleSubmit}
+          className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
+        >
+          Add Property
+        </button>
+
       </div>
     </div>
   );

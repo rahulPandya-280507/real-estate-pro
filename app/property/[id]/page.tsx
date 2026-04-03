@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import ImageGallery from "@/components/ImageGallery";
 
 async function getProperty(id: string) {
   try {
@@ -8,10 +9,6 @@ async function getProperty(id: string) {
         cache: "no-store",
       }
     );
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch properties");
-    }
 
     const properties = await res.json();
 
@@ -23,7 +20,7 @@ async function getProperty(id: string) {
 }
 
 export default async function PropertyPage({ params }: any) {
-  const { id } = await params; // ✅ required for Next.js
+  const { id } = await params;
 
   const property = await getProperty(id);
 
@@ -42,17 +39,10 @@ export default async function PropertyPage({ params }: any) {
       <div className="px-4 md:px-10 py-10 bg-gray-50 min-h-screen">
         <div className="grid md:grid-cols-2 gap-10 items-start">
 
-          {/* Image */}
-          <img
-            src={
-              property.image?.startsWith("http")
-                ? property.image
-                : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
-            }
-            className="w-full h-[40vh] md:h-[60vh] object-cover rounded-2xl shadow-md"
-          />
+          {/* 🔥 IMAGE GALLERY */}
+          <ImageGallery images={property.images} />
 
-          {/* Details */}
+          {/* DETAILS */}
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
               {property.title}
@@ -70,7 +60,7 @@ export default async function PropertyPage({ params }: any) {
               {property.description}
             </p>
 
-            <button className="mt-8 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 active:scale-95 transition duration-150 ease-in-out font-medium">
+            <button className="mt-8 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 active:scale-95 transition">
               Contact Broker
             </button>
           </div>

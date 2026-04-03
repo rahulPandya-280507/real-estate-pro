@@ -10,7 +10,7 @@ transition duration-300 ease-in-out cursor-pointer"
       >
         <div className="overflow-hidden">
           <img
-            src={property.image}
+            src={property.image?.[0]}
             className="w-full h-56 object-cover transition duration-300 hover:scale-110"
           />
         </div>
