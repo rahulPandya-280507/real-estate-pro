@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 
 export default function AdminClient() {
   const [form, setForm] = useState({
@@ -73,6 +74,13 @@ export default function AdminClient() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-xl">
         <h1 className="text-2xl font-bold mb-6 text-gray-900">Admin Panel</h1>
+
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="mb-4 bg-red-500 text-white px-4 py-2 rounded"
+        >
+          Logout
+        </button>
 
         <div className="space-y-4">
           <input

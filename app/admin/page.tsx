@@ -6,6 +6,8 @@ import AdminClient from "./AdminClient";
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
+  console.log("SESSION:", session);
+
   if (!session) {
     redirect("/login");
   }
